@@ -1,0 +1,52 @@
+<html>
+  <head>
+   <script type='text/javascript'>
+	var lastMove = 0, d_time = 100;
+	var motor_min = 500, motor_max = 1023, servo_min = 30, servo_max = 150, accelerometer_max = 10;
+
+	document.addEventListener('DOMContentLoaded', function(){
+		if (window.DeviceMotionEvent) {
+		  window.addEventListener('devicemotion', deviceMotionHandler, false);
+		} else {
+		  document.getElementById("dmEvent").innerHTML = "Accelerometer not supported. Did you use HTTPS in URL? Accelerometer works only under HTTPS."
+		}
+	});
+
+	function deviceMotionHandler(eventData) {
+		var now = Date.now();
+		if (lastMove + d_time > now) {
+			return; // don't flood ESP with requests every tiny angle phone turned
+		}
+		
+		lastMove = now; 
+	
+		acceleration = eventData.accelerationIncludingGravity;
+		var speed = 0, turn = 0, x_abs = Math.abs(acceleration.x), y_abs = Math.abs(acceleration.y),
+			x_sign = acceleration.x / x_abs, y_sign = acceleration.y / y_abs;
+		
+		speed = Math.round( (motor_max - motor_min) / accelerometer_max * y_abs + motor_min );
+		speed = y_sign * Math.min(motor_max, speed);
+	  
+		turn = Math.round( (accelerometer_max + acceleration.x) / (2 * accelerometer_max) * (servo_max - servo_min) + servo_min );
+		turn = Math.min(servo_max, Math.max(servo_min, turn));
+	  
+		var request_arr = {}; 
+		request_arr['m1'] = speed; 
+		request_arr['s2'] = turn; 
+		var ws_request = JSON.stringify(request_arr);
+
+		var debug_str = "dx = " + acceleration.x + "<br/>dy = " + acceleration.y + "<br/>speed = " + speed +  "<br/>turn = " + turn + "<br/>JSON = " + ws_request;
+		document.getElementById("dmEvent").innerHTML = debug_str;
+		// SEND WS!!!
+	}
+   </script>
+  </head>
+	
+  <body>
+
+<h3>asdasd</h3>
+
+
+<div id="dmEvent"></div>
+
+    </body></html>

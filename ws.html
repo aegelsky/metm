@@ -1,0 +1,68 @@
+<html> 
+ <head>
+  <script type='text/javascript'>
+	var ws = false;
+	
+	function update(e) {
+		console.log(e);
+		document.getElementById('status').innerHTML = "Connected!";
+	};
+
+
+
+	
+	function nw() {
+		var t_ws = new WebSocket('ws://' + document.getElementById('ip').value + ':81/', ['arduino']);
+		t_ws.onmessage = update;
+		
+		// onopen onmessage onerror onclose
+		
+		return t_ws;
+	}
+	
+	function connect() {
+		if (!ws || (ws.readyState === ws.CLOSED)) {
+			ws = nw();
+			document.getElementById('status').innerHTML = "Connecting...";
+		}
+	}
+	
+	function send_ws(str) {
+		if (ws.readyState === ws.CLOSED) {
+			ws = nw();
+		}
+		if (ws.readyState === ws.OPEN) {
+			ws.send(str);
+		}
+	}
+	
+	/// JSON.stringify({ x: 5, y: 6 });
+	
+	
+	window.onload = function() {
+
+
+        
+    }
+   </script> 
+</head> 
+<body>
+    <h3> Make Every Thing Move! </h3><br/>
+	<div>
+		<strong>Status:</strong>
+		<label id="status">Disconnected</label>
+	</div><br/>
+	
+	<div>
+		<input type="text" id="ip" value="192.168.100.6" />
+		<button onclick="connect();return false;">Connect</button>
+	</div><br>
+	
+	<div>
+		<input type="text" id="str" value="{m1:123, s1: 90}" />
+		<button onclick="send_ws(document.getElementById('str').value);return false;">Send</button>
+	</div><br>
+	
+	
+</body> 
+</html>
